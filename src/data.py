@@ -16,13 +16,14 @@ if __name__ == '__main__' :
     
     for x in range(num_cell_x) :
         for y in range(num_cell_y) :
-            cell_path = data_dir + os.sep +  str(x) + '-' + str(y) # generate the file name  
-            cell_file = open(cell_path, 'w')
-            lines = []
-            for i in range(server_per_cell) : # generate fake IPs
-                ip_inc += 1
-                lines.append(inttoip(ip_inc + IP_BASE) + os.linesep)
-            cell_file.writelines(lines)
-            cell_file.close()
+            cell_path = data_dir + os.sep +  str(x) + '-' + str(y) # generate the file name
+            with open(cell_path, 'w') as cell_file :
+            # cell_file = open(cell_path, 'w')
+                lines = []
+                for i in range(server_per_cell) : # generate fake IPs
+                    ip_inc += 1
+                    lines.append(inttoip(ip_inc + IP_BASE) + os.linesep)
+                cell_file.writelines(lines)
+            # cell_file.close()
 
 
