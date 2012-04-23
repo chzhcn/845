@@ -8,14 +8,13 @@ def to_global_thr_index(index, thr_index) :
 
     proc_col = index % num_region_x
     proc_row = index / num_region_x
-    
+
     thr_col = thr_index % num_thread_region_x
     thr_row = thr_index / num_thread_region_x
 
     # print  '((%s + (%s * %s + %s) * %s) * %s + %s)' % (proc_col, proc_row, num_thread_region_y, thr_row, num_region_x, num_thread_region_x, thr_col)
 
     return ((proc_col + (proc_row * num_thread_region_y + thr_row) * num_region_x) * num_thread_region_x + thr_col)
-    
 
 def one_2_two(index, num_x, total_x, num_y, total_y) :
     num_per_x = total_x / num_x
