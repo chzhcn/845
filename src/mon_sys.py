@@ -1,25 +1,16 @@
 import os
 import Queue
 import threading
-import thread
 
 from multiprocessing import Pool, Process
 
 from defines import *
 
-from util import thr_indice, cells_of_thread
+from util import thr_indice
+from thr import child_thread
 
 def print_func(cell) :
     print cell,
-
-def child_thread(q, thr_func) :
-    while True :
-        g_thr_index = q.get()
-        print 'thread id : %s, g_thr_index : %s' % (thread.get_ident(), g_thr_index),
-
-        map(thr_func, cells_of_thread(g_thr_index))
-        print
-        q.task_done()
 
 def child_process(index) :
     print 'pid: %s, index: %s' % (os.getpid(), index)
