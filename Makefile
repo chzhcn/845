@@ -11,5 +11,6 @@ rmdata:
 	rm -rf $(DATA_DIR)
 
 clean:
+	rm -rf .*~
 	rm -rf $(SRC_DIR)/*~
 	rm -rf $(SRC_DIR)/*.pyc
