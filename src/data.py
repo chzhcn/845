@@ -22,7 +22,7 @@ if __name__ == '__main__' :
                 lines = []
                 for i in xrange(server_per_cell) : # generate fake IPs
                     ip_inc += 1
-                    lines.append(inttoip(ip_inc + IP_BASE) + os.linesep)
+                    lines.append(inttoip(ip_inc + IP_BASE) + ' 1' + os.linesep)
                 cell_file.writelines(lines)
             # cell_file.close()
 
