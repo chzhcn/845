@@ -4,6 +4,7 @@ import random
 import re
 import threading
 import thread
+import Queue
 from multiprocessing import Pool, Process, Pipe
 from thr import child_thread
 from util import thr_indice
@@ -15,22 +16,20 @@ def stream_music(self, message) :
 '''
 
 class disaster_controller:
-    #broken_prob = 0.8
-    fail_threshold = 0.6
     normal_prob = 0.95
     # size of matrix is the same as the map
     # each element's value is the probability of disaster NOT happening
-    prob_matrix = None 
-    rand_seed = 0
-    rand_amount = 100 # used to control accuracy
+    prob_matrix = None
+    pipes = None
+    process_workers = None
     def __init__(self):
-        self.rand_seed = random.randint(0,100000)
         self.prob_matrix = []
         for i in range (0, num_cell_y):
             aRow = []
             for j in range (0, num_cell_x):
                 aRow.append(self.normal_prob)
             self.prob_matrix.append(aRow)  
+        self.initialize_worker_processes()
     
     def fill_matrix(self, prob, start_row = 0, end_row = num_cell_y, start_col = 0, end_col = num_cell_x):
         # check boundary
@@ -42,6 +41,18 @@ class disaster_controller:
         for i in range (start_row, end_row):
             for j in range (start_col, end_col):
                 self.prob_matrix[i][j] = prob
+    
+    def cell_to_region(self, cell):
+        row,col = cell
+        reg_row = row / cell_per_region_y
+        reg_col = col / cell_per_region_x
+        region_index = reg_row*num_region_x + reg_col
+        return region_index
+    
+    def region_index_to_grid(self, index):
+        
+        pass
+    
     
     def print_usage(self):
         print "--------------------Usage of the disaster controller--------------------"
@@ -59,16 +70,17 @@ class disaster_controller:
                 
             paraList = rawInput.split(" ")
             ctype = paraList[0]
+            change_region = set()
             
             if ctype == '1':
                 print "Type " + ctype + ": All servers are up."
                 self.fill_matrix(1)
-                self.print_matrix()
+                change_region = {x for x in range(num_region)}
                 
             elif ctype == '2':
                 print "type " + ctype + ": All servers are down."
                 self.fill_matrix(0)
-                self.print_matrix()
+                change_region = {x for x in range(num_region)}
                 
             elif ctype == '3':
                 print "type " + ctype + ": the given list of cells are down."
@@ -77,8 +89,9 @@ class disaster_controller:
                         # the coordinate format is row,col
                         # if the format is (row,col), change r'\d+' to r'(\d+)'
                         row,col = map(int, re.findall(r'\d+', paraList[i]))
-                        self.prob_matrix[row][col] = 0                        
-                self.print_matrix()        
+                        self.prob_matrix[row][col] = 0  
+                        region_index = self.cell_to_region((row,col))
+                        change_region.add(region_index)                            
                 
             elif ctype == '4':
                 print "type " + ctype + ": the rectangle region of cells are down."
@@ -92,38 +105,76 @@ class disaster_controller:
                     start_col, end_col = end_col, start_col # swap
                         
                 self.fill_matrix(0, start_row, end_row+1, start_col, end_col+1)
-                self.print_matrix()
-            
+                
+                left_top_region = self.cell_to_region((start_row,start_col))
+                right_down_region = self.cell_to_region((end_row,end_col))
+                
+                '''
+                for i in range (start_row, end_row):
+                    for j in range (start_col, end_col):
+                        self.prob_matrix[i][j] = prob
+                '''
+                
+                
+                
             elif ctype == '5':
                 prob = float(paraList[1])
                 print "type " + ctype + ": All servers are up with " + str(prob*100) + "% probability."
-                self.fill_matrix(prob)
-                self.print_matrix()    
+                self.fill_matrix(prob) 
+                change_region = {x for x in range(num_region)}
+                  
             else:
                 print "ERROR: Wrong control parameter!"
+                continue
+            self.print_matrix()
+            self.assign_jobs(change_region)
+            
+    def initialize_worker_processes(self):
+        pipe_pairs = [Pipe() for x in range(num_region)] #self.control_process
+        self.process_workers = [Process(target = self.test_proc, args = (i, pipe_pairs[i][1])) for i in xrange(num_region)]
+        self.pipes = [pipe_pair[0] for pipe_pair in pipe_pairs]
+        map(lambda p:p.start(), self.process_workers)
+        #for p in self.process_workers:
+        #    p.start()
+
+        # self.worker_pool = Pool(processes=num_region)
+        # self.worker_pool.map_async(self.control_process, (x for x in xrange(num_region)))
+        # pool.map_async(worker, (x for x in xrange(num_region)))
+        # pool.close()
+        # pool.join()
     
+    def test_proc(self, index, pipe_conn):
+        print "In test_proc:" + str(index)
+        msg = pipe_conn.recv()
+        print msg
+    
+        
     # Generate processes (#: num_region_x * num_region_y)
     # Each process generates threads (#: num_thread_region_x * num_thread_region_y)
     # to do the job (write 1/0 to files) 
-    def assign_jobs(self):
-        p = Process(target = self.control_process, args=(31,))
-        p.start()
-        p.join()
-    
-    def control_process(self, region_index):
+    def assign_jobs(self, change_region):
+        for i in change_region:
+            self.pipes[i].send("Go!")
+         
+    def control_process(self, region_index, pipe_conn):
         print 'pid: %s, index: %s' % (os.getpid(), region_index)
 
         q = Queue.Queue()
     
-        [threading.Thread(target = child_thread, args = (q, self.do_control_job)).start() for i in xrange(num_thread_region)]
-    
+        [threading.Thread(target = child_thread, args = (q, self.do_test_job)).start() for i in xrange(num_thread_region)]
+        
         while True :
+            msg = pipe_conn.recv() #wait for signal from pipe
+            print "Worker process: " + str(region_index) + " "+ msg
             map(lambda thr_index : q.put(thr_index), thr_indice(region_index))
             q.join()
-            print 'one iteration'
-                        
-    def do_control_job(self, region_code):
-        if region_code == -1: #testing
+            print "Worker process: " + str(region_index) + " Done!"
+    
+    def do_test_job(self, cell):
+        print cell
+                            
+    def do_control_job(self, cell):
+        if cell == -1: #testing
             prob = self.prob_matrix[0][0]
             lines = []        
             with open("0-0", "r") as f:
@@ -138,17 +189,31 @@ class disaster_controller:
                     #lines.append(aLine)
             with open("0-0", "w") as f:    
                 f.writelines(lines)
-          
+        else: # x,y = cell
+            row,col = cell
+            prob = self.prob_matrix[row][col]
+            lines = [] 
+            filename = str(row)+"-"+str(col)       
+            with open(filename, "r") as f:
+                for aLine in f.readlines():
+                    upOrDown = self.randUpOrDown(prob) 
+                    aLine = aLine.split(" ") # split for only getting IP
+                    #strip() to remove newline
+                    newLine = aLine[0].strip() + " " + str(upOrDown) + "\n"
+                    #print newLine
+                    print repr(newLine)
+                    lines.append(newLine)
+                    #lines.append(aLine)
+            with open(filename, "w") as f:    
+                f.writelines(lines)
+            
     # given probability, return 0 (server down) or 1 (server up)
     def randUpOrDown(self, prob):
-        random.seed(self.rand_seed)
-        self.rand_seed = self.rand_seed+1
-        upList = [1]*(int(prob*self.rand_amount))
-        downList = [0]*(int((1-prob)*self.rand_amount))
-        comList = upList + downList
-        #random.shuffle(comList)
-        #Return a random element from the non-empty sequence seq. If seq is empty, raises IndexError.
-        return random.choice(comList)
+        rand_num = random.random()
+        if rand_num > prob:
+            return 0
+        else:
+            return 1
     
     def print_matrix(self):
         for i in range (0, num_cell_y):
@@ -157,5 +222,6 @@ class disaster_controller:
             print  
 
 
+    
 
     

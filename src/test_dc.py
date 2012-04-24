@@ -8,3 +8,6 @@ if __name__ == '__main__' :
    
     dc.start_controller()
     
+    #cell = (6,14)
+    #print dc.cell_to_region(cell)
+    
