@@ -5,7 +5,6 @@ def thr_indice(index) :
         yield to_global_thr_index(index, i)
 
 def to_global_thr_index(index, thr_index) :
-
     proc_col = index % num_region_x
     proc_row = index / num_region_x
 
@@ -19,15 +18,28 @@ def to_global_thr_index(index, thr_index) :
 def one_2_two(index, num_x, total_x, num_y, total_y) :
     num_per_x = total_x / num_x
     num_per_y = total_y / num_y
-    x = temp_x = (index % num_x) * num_per_x
-    y = temp_y = (index / num_x) * num_per_y
-
-    while y < temp_y + num_per_y :
+    temp_x = (index % num_x) * num_per_x
+    temp_y = (index / num_x) * num_per_y
+    
+    for y in xrange(temp_y, temp_y + num_per_y) :
         x = temp_x
-        while x < temp_x + num_per_x :
-            yield (x, y)
-            x += 1
-        y += 1
+        for x in xrange(temp_x, temp_x + num_per_x) :
+            yield (y, x)        # in form of (y, x), which is (row, column)
+            
+def region_index_2_grid(index) :
+    temp = [grid for grid in one_2_two(index, num_region_x, num_region_x, num_region_y, num_region_y)]
+    assert (len(temp) == 1)
+    return temp[0]
+    
+
+def region_grids_with_corner_indice(topleft, bottomright) :
+    tl = region_index_2_grid(topleft)
+    bt = region_index_2_grid(bottomright)
+
+    for y in xrange(tl[0], bt[0] + 1) :
+        x = tl[0]
+        for x in xrange (tl[1], bt[1] + 1) :
+            yield (y, x)
 
 def cells_of_region(index) :
     return one_2_two(index, num_region_x, num_cell_x, num_region_y, num_cell_y)

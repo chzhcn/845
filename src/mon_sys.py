@@ -2,44 +2,75 @@ import sys
 import os
 import Queue
 import threading
-
-from multiprocessing import Pool, Process
+import thread
+import random
 
 from defines import *
-
-from util import thr_indice
-from thr import child_thread
+from multiprocessing import Pool, Process
+from util import thr_indice, cells_of_thread
 
 data_path = None
+result_map = {}
 
 def print_cell(cell) :
     print cell,
 
+def cell_result(res) :
+    return 1 if sum(res) > success_threshold * len(res) else 0
+
 def ping_cell(cell) :
-    print data_path
+    cell_path = data_path + os.sep + str(cell[0]) + '-' + str(cell[1])
+    samples = {}
+    with open(cell_path, 'r') as fcell:
+        lines = fcell.readlines()
+        size = len(lines)
+        sample_size = size * sample_rate
+        i = 0
+        while i < sample_size :
+            s = random.randint(0, size - 1)
+            if s not in samples.keys() :
+                # print lines[s][-2:-1]
+                samples[s] = int(lines[s][-2:-1])
+                i += 1
+    res = samples.values()
+    result = cell_result(res)
+    if result == 0 :
+        result_map[cell] = result
+
+def child_thread(q, thr_func) :
+    while True :
+        g_thr_index = q.get()
+        # print 'thread id : %s, g_thr_index : %s' % (thread.get_ident(), g_thr_index),
+
+        map(thr_func, cells_of_thread(g_thr_index))
+        # print
+        q.task_done()
 
 def mon_process(index) :
     print 'pid: %s, index: %s' % (os.getpid(), index)
 
     q = Queue.Queue()
+    # result_map = {}
 
     thr_worker = ping_cell
     [threading.Thread(target = child_thread, args = (q, thr_worker)).start() for i in xrange(num_thread_region)]
 
     while True :
+        result_map.clear()
         map(lambda thr_index : q.put(thr_index), thr_indice(index))
         q.join()
+        print result_map
         print 'one iteration'
+        break
 
 if __name__ == '__main__' :
     data_path = sys.argv[1]
-    # print 'pid: %s' % os.getpid()
+    print 'pid: %s' % os.getpid()
     worker = mon_process
-    p = Process(target = worker, args=(31,))
+    
+    p = Process(target = worker, args=(0, ))
     p.start()
     p.join()
 
-    # pool = Pool(num_region)
-    # pool.map_async(worker, (x for x in xrange(num_region)))
-    # pool.close()
-    # pool.join()
+    # [Process(target = worker, args = (i,)).start() for i in xrange(num_region)]
+
