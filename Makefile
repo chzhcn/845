@@ -8,13 +8,12 @@ data:
 	mkdir -p $(DATA_DIR)
 	python $(SRC_DIR)/data.py $(DATA_DIR)
 
-run: lis mon
-
 dc:
 	python $(SRC_DIR)/disaster_controller.py $(DATA_DIR)
 
 lis:
-	python $(SRC_DIR)/listen_sys.py 
+	python $(SRC_DIR)/listen_sys.py
+
 mon:
 	python $(SRC_DIR)/mon_sys.py $(DATA_DIR)
 
