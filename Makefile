@@ -4,8 +4,15 @@ DATA_DIR = data
 all: 
 
 data:
-	mkdir $(DATA_DIR)
+	mkdir -p $(DATA_DIR)
 	python $(SRC_DIR)/data.py $(DATA_DIR)
+
+run: lis mon
+
+lis:
+	python $(SRC_DIR)/listen_sys.py $
+mon:
+	python $(SRC_DIR)/mon_sys.py $(DATA_DIR)
 
 rmdata:
 	rm -rf $(DATA_DIR)

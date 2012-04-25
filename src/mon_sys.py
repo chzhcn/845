@@ -4,10 +4,12 @@ import Queue
 import threading
 import thread
 import random
+import socket
+import pickle
 
 from defines import *
 from multiprocessing import Pool, Process
-from util import thr_indice, cells_of_thread
+from util import thr_indice, cells_of_thread, cells_of_region
 
 data_path = None
 result_map = {}
@@ -52,6 +54,9 @@ def mon_process(index) :
     q = Queue.Queue()
     # result_map = {}
 
+    # for cell in cells_of_region(index) : print cell
+
+    # thr_worker = print_cell
     thr_worker = ping_cell
     [threading.Thread(target = child_thread, args = (q, thr_worker)).start() for i in xrange(num_thread_region)]
 
@@ -60,8 +65,20 @@ def mon_process(index) :
         map(lambda thr_index : q.put(thr_index), thr_indice(index))
         q.join()
         print result_map
-        print 'one iteration'
-        break
+        send_process_result(result_map)
+        # print 'one iteration'
+        # break
+
+def send_process_result(map) :
+    try :
+        send_socket = socket.create_connection(report_addr, 10)
+        data = pickle.dumps(map)
+        send_socket.send(data);
+    except Exception as inst:
+        print type(inst)
+        print inst
+        print "send_process_result() exception. report_addr: %s obj: %s" % (report_addr, str(map))
+        # raise
 
 if __name__ == '__main__' :
     data_path = sys.argv[1]
