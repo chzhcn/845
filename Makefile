@@ -1,8 +1,9 @@
 SRC_DIR = src
-DATA_DIR = data
+DATA_DIR = /afs/andrew.cmu.edu/usr16/hsuehhac/public/data
 
 all: 
 
+.PHONY : data
 data:
 	mkdir -p $(DATA_DIR)
 	python $(SRC_DIR)/data.py $(DATA_DIR)
