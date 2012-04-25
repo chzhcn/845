@@ -1,4 +1,4 @@
-from defines_large import *
+from defines_small import *
 
 sample_rate = 0.1
 
