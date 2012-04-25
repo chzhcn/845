@@ -4,6 +4,7 @@ import random
 import re
 import threading
 import Queue
+import sys
 from multiprocessing import Process, Pipe, Array
 from mon_sys import child_thread
 from util import thr_indice, region_grids_with_corner_indice, cell_to_region
@@ -53,12 +54,15 @@ def start_ui():
         if ctype == '1':
             print "Type " + ctype + ": All servers are up."
             fill_matrix(1)
-            change_region.update({x for x in range(num_region)})
-            
+            #change_region.update({x for x in range(num_region)})
+            for x in range(num_region):
+                change_region.add(x)
         elif ctype == '2':
             print "type " + ctype + ": All servers are down."
             fill_matrix(0)
-            change_region.update({x for x in range(num_region)})
+            #change_region.update({x for x in range(num_region)})
+            for x in range(num_region):
+                change_region.add(x)
             
         elif ctype == '3':
             print "type " + ctype + ": the given list of cells are down."
@@ -94,7 +98,9 @@ def start_ui():
             prob = float(paraList[1])
             print "type " + ctype + ": All servers are up with " + str(prob*100) + "% probability."
             fill_matrix(prob) 
-            change_region.update({x for x in range(num_region)})
+            #change_region.update({x for x in range(num_region)})
+            for x in range(num_region):
+                change_region.add(x)
               
         else:
             print "ERROR: Wrong control parameter!"
@@ -184,7 +190,9 @@ def do_control_job(cell):
         prob = subproc_matrix[row][col]
         
         lines = [] 
-        filename = os.path.abspath(str(row)+"-"+str(col))       
+        dir_path = sys.argv[1]
+        #filename = os.path.abspath(str(row)+"-"+str(col))       
+        filename = dir_path + os.sep + str(row)+"-"+str(col)
         #print "Processing " + filename
         with open(filename, "r") as f:
             for aLine in f.readlines():
