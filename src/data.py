@@ -22,7 +22,7 @@ if __name__ == '__main__' :
     x, y = 0, 0
     
     for x in xrange(num_cell_x) :
-        for y in xrange(num_cell_y) :           #             #
+        for y in xrange(num_cell_y) :
             cell_path = data_dir + os.sep +  str(y) + '-' + str(x) # generate the file name
             with open(cell_path, 'w') as cell_file :
             # cell_file = open(cell_path, 'w')
