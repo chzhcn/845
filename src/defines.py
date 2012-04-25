@@ -16,3 +16,5 @@ cell_per_region_y = num_cell_y / num_region_y
 num_thread_region = (num_thread_region_x * num_thread_region_y)
 
 report_addr = ('128.2.13.133', 54321)
+
+normal_prob = 0.95
