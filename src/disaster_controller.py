@@ -129,7 +129,6 @@ def test_proc( index, pipe_conn):
 # to do the job (write 1/0 to files) 
 def assign_jobs(change_region):
     for i in change_region:
-        print "aj:" + str(i)
         pipes[i].send("Go!")
     for i in change_region:
         msg = pipes[i].recv()
