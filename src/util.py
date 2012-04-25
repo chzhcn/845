@@ -38,7 +38,14 @@ def region_grids_with_corner_indice(topleft, bottomright) :
     for y in xrange(tl[0], bt[0] + 1) :
         x = tl[0]
         for x in xrange (tl[1], bt[1] + 1) :
-            yield (y, x)
+            yield y*num_region_x + x
+
+def cell_to_region(cell):
+    row,col = cell
+    reg_row = row / cell_per_region_y
+    reg_col = col / cell_per_region_x
+    region_index = reg_row*num_region_x + reg_col
+    return region_index
 
 def cells_of_region(index) :
     return one_2_two(index, num_region_x, num_cell_x, num_region_y, num_cell_y)
