@@ -1,0 +1,21 @@
+<!doctype html>
+<title>Hello from Flask</title>
+<!-- <img src="static/images.jpeg" width="1920" height="1440" alt="Image" usemap="#grid" /> -->
+
+<!-- <map name="grid"> -->
+<!--   <area shape="rect" coords="0,0,82,126" href="sun.htm" alt="Sun" /> -->
+<!--   <\!-- <area shape="circle" coords="90,58,3" href="mercur.htm" alt="Mercury" /> -\-> -->
+<!--   <\!-- <area shape="circle" coords="124,58,8" href="venus.htm" alt="Venus" /> -\-> -->
+<!-- </map> -->
+
+<h1>Hello World!</h1>
+
+<table id="maps" border='1'>
+    {% for y in range(num_cell_y) %} 
+  <tr>
+    {% for x in range(num_cell_x) %}
+    <td>xx</td>
+    {% endfor %}
+    </tr>
+  {% endfor %}
+</table>
