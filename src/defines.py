@@ -1,4 +1,4 @@
-from defines_one import *
+from defines_small import *
 
 num_sample = 17
 
@@ -14,7 +14,7 @@ cell_per_region_y = num_cell_y / num_region_y
 
 num_thread_region = (num_thread_region_x * num_thread_region_y)
 
-report_addr = ('127.0.0.1', 54321)
+report_addr = ('', 50007)
 
 normal_prob = 0.90
 

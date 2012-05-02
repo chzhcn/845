@@ -11,7 +11,7 @@ map = {}
 def index():
     return render_template('hello.html', num_cell_x=num_cell_x, num_cell_y=num_cell_y, map=map)
 if __name__ == '__main__' :
-    l = lis()    
+    l = listen_sys.lis()
     
-    threading.Thread(target=l.run, global_map=map)
+    threading.Thread(target=l.run, args=(map,)).start()
     app.run(debug=True)

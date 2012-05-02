@@ -3,14 +3,14 @@ import pickle
 from defines import *
 
 class lis():
-    def __init__() :
+    def __init__(self) :
         self.listening_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.listening_sock.bind(report_addr)
         self.listening_sock.listen(5)
 
-    def run(global_map) :
+    def run(self, global_map) :
         while True :
-            peer_socket, peer_address = listening_sock.accept()
+            peer_socket, peer_address = self.listening_sock.accept()
             data = peer_socket.recv(8192 * 1024)
             peer_socket.close()
             map = pickle.loads(data)[1];
