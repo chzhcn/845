@@ -11,3 +11,5 @@ num_region_y = 4
 
 num_thread_region_x = 4
 num_thread_region_y = 3
+
+sleep_time = 32
