@@ -9,9 +9,7 @@ map = {}
 
 @app.route('/')
 def index():
-    return render_template('hello.html', num_cell_x=num_cell_x, num_cell_y=num_cell_y)
-
-
+    return render_template('hello.html', num_cell_x=num_cell_x, num_cell_y=num_cell_y, map=map)
 if __name__ == '__main__' :
     l = lis()    
     

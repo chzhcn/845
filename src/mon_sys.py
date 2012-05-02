@@ -6,6 +6,7 @@ import thread
 import random
 import socket
 import pickle
+import time
 
 from defines import *
 from multiprocessing import Pool, Process
@@ -26,7 +27,8 @@ def ping_cell(cell) :
     with open(cell_path, 'r') as fcell:
         lines = fcell.readlines()
         size = len(lines)
-        sample_size = size * sample_rate
+        # sample_size = size * sample_rate
+        sample_size = num_sample
         i = 0
         while i < sample_size :
             s = random.randint(0, size - 1)
@@ -64,15 +66,16 @@ def mon_process(index) :
         result_map.clear()
         map(lambda thr_index : q.put(thr_index), thr_indice(index))
         q.join()
-        print result_map
-        send_process_result(result_map)
+        # print result_map
+        send_process_result((index, result_map))
+        time.sleep(sleep_time)
         # print 'one iteration'
         # break
 
-def send_process_result(map) :
+def send_process_result(msg) :
     try :
-        send_socket = socket.create_connection(report_addr, 10)
-        data = pickle.dumps(map)
+        send_socket = socket.create_connection(report_addr)
+        data = pickle.dumps(msg)
         send_socket.send(data);
     except Exception as inst:
         print type(inst)

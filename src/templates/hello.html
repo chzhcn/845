@@ -14,7 +14,13 @@
     {% for y in range(num_cell_y) %} 
   <tr>
     {% for x in range(num_cell_x) %}
-    <td>xx</td>
+    <td>
+      {% if (y, x) in map.keys() and map[(y, x)] = 0 %}
+      <a href="static/red.gif/><img src="../static/pause2.png" height="10" width="10"/></a>
+      {% else %}
+      <a href="static/green.png/><img src="../static/pause2.png" height="10" width="10"/></a>
+      {% end if%}
+    </td>
     {% endfor %}
     </tr>
   {% endfor %}
